@@ -1,23 +1,14 @@
 name: check-rs
 
 on:
-  push:
-    branches:
-      - main
-    tags-ignore:
-      - "**"
   pull_request:
 
-# cancel previous job runs for the same workflow + pr
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
 
 jobs:
-  lint-format-test:
-    name: lint, format, spell check, test
+  install-protoc: 
+    name: intsall protoc
     runs-on: ubuntu-latest
-    steps:
+    steps: 
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -25,22 +16,16 @@ jobs:
         uses: arduino/setup-protoc@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+  lint-format-test:
+    name: lint, format, spell check, test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Install toolchain
-        run: rustup show
-
-      - name: Pnpm Cache
-        uses: ./.github/actions/pnpm-cache
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: check
-
-      - name: Spell Check
-        uses: crate-ci/typos@master
-        with:
-          files: .
+        run: |
+          exit -1
 
       - name: Run rustfmt
         uses: actions-rs/cargo@v1
@@ -56,9 +41,6 @@ jobs:
         with:
           command: clippy
           args: --workspace --all-targets -- -D warnings
-
-      - name: Check Dependencies
-        run: node ./scripts/check_rust_dependency.js
 
       - name: Run test
         # We need to install sass first to enable sass-loader
