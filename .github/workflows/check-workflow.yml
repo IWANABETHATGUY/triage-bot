@@ -47,3 +47,7 @@ jobs:
         run: |
           node -e "console.log(process.arch)"
           cargo test --workspace  -- --nocapture --test-threads=1
+
+      - name: The step only run the job is failed.
+        uses: andymckay/cancel-action@0.3
+        if: ${{ !success() }}
